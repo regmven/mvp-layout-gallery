@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -9,94 +10,360 @@ const imagePool = [
   "/brand/condado-floorplan.jpg",
 ];
 
-function pickImage(index: number) {
+function img(index: number) {
   return imagePool[index % imagePool.length];
 }
 
-function MediaCard(image: string, title: string, copy: string, tall = false) {
-  return `
-    <div class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
-      <div class="${tall ? "h-80" : "h-56"} w-full bg-cover bg-center" style="background-image:url('${image}')"></div>
-      <div class="p-5">
-        <p class="text-xl font-semibold text-slate-950">${title}</p>
-        <p class="mt-3 text-sm leading-7 text-slate-600">${copy}</p>
+function Shell({ children, eyebrow, title, summary }: { children: React.ReactNode; eyebrow: string; title: string; summary: string }) {
+  return (
+    <main className="min-h-screen bg-white px-6 py-10 text-slate-950 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div className="max-w-3xl">
+            <p className="text-sm uppercase tracking-[0.25em] text-cyan-700">{eyebrow}</p>
+            <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">{title}</h1>
+            <p className="mt-4 text-base leading-7 text-slate-600">{summary}</p>
+          </div>
+          <Link href="/layout-showcase" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50">
+            All layouts
+          </Link>
+        </div>
+        {children}
       </div>
-    </div>
-  `;
+    </main>
+  );
 }
 
-function TextBlock(title: string, copy: string, eyebrow?: string, extraClass = "") {
-  return `
-    <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm ${extraClass}">
-      ${eyebrow ? `<p class="text-xs uppercase tracking-[0.24em] text-cyan-700">${eyebrow}</p>` : ""}
-      <h3 class="mt-3 text-2xl font-semibold tracking-[-0.03em] text-slate-950">${title}</h3>
-      <p class="mt-4 text-sm leading-7 text-slate-600">${copy}</p>
+function Photo({ src, alt, height = 320, rounded = "rounded-[32px]" }: { src: string; alt: string; height?: number; rounded?: string }) {
+  return (
+    <div className={`relative overflow-hidden border border-slate-200 bg-slate-100 shadow-sm ${rounded}`} style={{ height }}>
+      <Image src={src} alt={alt} fill className="object-cover" />
     </div>
-  `;
+  );
 }
 
-function layoutMarkup(slug: string) {
-  const hero = `
-    <section class="rounded-[40px] border border-slate-200 bg-[linear-gradient(180deg,#FFFFFF_0%,#F6FBFF_100%)] p-8 shadow-sm sm:p-10">
-      <div class="flex flex-wrap gap-3 text-sm">
-        <span class="rounded-full bg-cyan-100 px-3 py-1 text-cyan-900">Condado reference brand</span>
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700">Modern living</span>
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-700">Long-term rental</span>
-      </div>
-      <h1 class="mt-6 max-w-4xl text-5xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-6xl">${slug.replaceAll("-", " ")} layout applied to a modern Caribbean property brand.</h1>
-      <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600">This page shows how one structural system changes the feel of the same MVP. The goal is to compare geometry, density, pacing, and visual emphasis.</p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <a href="/layout-showcase" class="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white">Back to index</a>
-        <a href="/" class="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900">Open starter route</a>
-      </div>
-    </section>
-  `;
+function TextCard({ title, copy, eyebrow }: { title: string; copy: string; eyebrow?: string }) {
+  return (
+    <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+      {eyebrow ? <p className="text-xs uppercase tracking-[0.24em] text-cyan-700">{eyebrow}</p> : null}
+      <h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{title}</h3>
+      <p className="mt-4 text-sm leading-7 text-slate-600">{copy}</p>
+    </div>
+  );
+}
 
-  const commonText = "Aquí el punto no es el copy final sino el comportamiento del layout: cuánto aire deja, cuánto protagonismo da a imagen, y cómo prioriza lifestyle, inventario o conversión.";
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">{value}</p>
+    </div>
+  );
+}
 
+function LayoutView({ slug }: { slug: string }) {
   switch (slug) {
     case "editorial-split":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[1fr_1fr]">${TextBlock("Big headline + calm support", commonText, "Geometry")} ${MediaCard(pickImage(0), "Split visual", "Balanced text-media relationship with premium calm.", true)}</section><section class="grid gap-6 md:grid-cols-3">${TextBlock("Strength", "Muy claro y versátil.")}${TextBlock("Risk", "Puede sentirse serio de más si no tiene energía visual.")}${TextBlock("Best fit", "Servicios premium o property pages sobrias.")}</section>`;
+      return (
+        <Shell eyebrow="editorial layout" title="Editorial Split" summary="A clean two-column system with strong typography on one side and a supporting visual on the other.">
+          <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div className="space-y-6 rounded-[36px] border border-slate-200 bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FCFF_100%)] p-8 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.25em] text-slate-500">Condado reference application</p>
+              <h2 className="text-5xl font-semibold tracking-[-0.05em] text-slate-950">Big type, calm spacing, clear hierarchy.</h2>
+              <p className="max-w-xl text-lg leading-8 text-slate-600">This layout feels organized and premium, but still slightly formal. Good for trust-heavy brands.</p>
+            </div>
+            <Photo src={img(0)} alt="Editorial split image" height={560} />
+          </section>
+          <section className="mt-6 grid gap-6 md:grid-cols-3">
+            <TextCard title="Strength" copy="Very readable and versatile." />
+            <TextCard title="Risk" copy="Can feel conservative if the visuals are weak." />
+            <TextCard title="Best fit" copy="Consulting, services, and structured property pages." />
+          </section>
+        </Shell>
+      );
     case "gallery-lead":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">${MediaCard(pickImage(1), "Hero gallery block", "La imagen lidera y el texto acompaña.", true)}<div class="space-y-6">${TextBlock("Why it works for Condado", "Hace que la propiedad se sienta más joven, más viva y menos corporativa.", "Recommended")} ${MediaCard(pickImage(2), "Support frame", "Floor plan and details become secondary supporting proof.")}</div></section><section class="grid gap-6 md:grid-cols-3">${MediaCard(pickImage(0), "Amenity", "Beach + city lifestyle.")}${MediaCard(pickImage(1), "Residence", "Modern layouts.")}${MediaCard(pickImage(2), "Plan", "Clear leasing support.")}</section>`;
+      return (
+        <Shell eyebrow="hospitality layout" title="Gallery Lead" summary="The page opens with image dominance and uses text as support rather than the other way around.">
+          <section className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+            <Photo src={img(1)} alt="Gallery lead main image" height={620} rounded="rounded-[40px]" />
+            <div className="flex flex-col gap-6">
+              <TextCard eyebrow="recommended" title="Image-first geometry" copy="This immediately feels younger and more lifestyle-driven. For Condado, that matters." />
+              <Photo src={img(2)} alt="Floor plan support" height={260} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <MiniStat label="Mood" value="Fresh" />
+                <MiniStat label="Density" value="Low" />
+              </div>
+            </div>
+          </section>
+          <section className="mt-6 grid gap-6 md:grid-cols-3">
+            <Photo src={img(0)} alt="Amenity image" height={250} rounded="rounded-[28px]" />
+            <Photo src={img(1)} alt="Residence image" height={250} rounded="rounded-[28px]" />
+            <Photo src={img(2)} alt="Plan image" height={250} rounded="rounded-[28px]" />
+          </section>
+        </Shell>
+      );
     case "magazine-luxury":
-      return `${hero}<section class="space-y-6">${TextBlock("Magazine rhythm", "Bloques editoriales grandes, captions cortos y mucha respiración visual.", "Strong pick")}<div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">${TextBlock("Luxury tone", "Se siente más cercano a una marca editorial o residencia boutique que a una landing tradicional.")}${MediaCard(pickImage(0), "Editorial visual lead", "A stronger visual stage creates a more contemporary premium feel.", true)}</div><div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">${MediaCard(pickImage(1), "Secondary scene", "Alternating media keeps movement without clutter.")} ${TextBlock("Condado fit", "Muy buena para vender deseo, marca y percepción de valor.")}</div></section>`;
+      return (
+        <Shell eyebrow="editorial luxury" title="Magazine Luxury" summary="A slower, more luxurious editorial rhythm with large image chapters and short refined text blocks.">
+          <section className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+              <TextCard eyebrow="strong pick" title="A premium editorial pace" copy="Instead of sounding like a landing page, this feels more like a branded residence feature." />
+              <Photo src={img(0)} alt="Magazine hero image" height={620} rounded="rounded-[44px]" />
+            </div>
+            <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+              <Photo src={img(1)} alt="Secondary editorial image" height={420} />
+              <div className="space-y-6">
+                <TextCard title="Why it works" copy="Good for aspiration, better for perceived brand value, and less likely to feel like an old template." />
+                <TextCard title="Tone" copy="Shorter copy, stronger images, more confidence." />
+              </div>
+            </div>
+          </section>
+        </Shell>
+      );
     case "full-bleed-story":
-      return `${hero}<section class="space-y-6">${MediaCard(pickImage(0), "Full-width opening", "Cinematic storytelling through wide media bands.", true)}${TextBlock("Story advantage", "Ideal para una marca que vive de aspiración visual y entorno.")} ${MediaCard(pickImage(1), "Second wide band", "Each wide section acts like a chapter.", true)}</section>`;
+      return (
+        <Shell eyebrow="cinematic layout" title="Full-Bleed Story" summary="Big horizontal media chapters with short supporting text between them.">
+          <section className="space-y-8">
+            <Photo src={img(0)} alt="Wide hero band" height={700} rounded="rounded-[20px]" />
+            <div className="mx-auto max-w-3xl">
+              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950">Wide scenes become the narrative engine.</h2>
+              <p className="mt-4 text-lg leading-8 text-slate-600">Great when the brand needs emotional pull and environment more than detailed explanation.</p>
+            </div>
+            <Photo src={img(1)} alt="Second wide band" height={640} rounded="rounded-[20px]" />
+          </section>
+        </Shell>
+      );
     case "bento-grid":
-      return `${hero}<section class="grid auto-rows-fr gap-6 md:grid-cols-3">${MediaCard(pickImage(0), "Large block", "Hero capability or lifestyle card.", true)}${TextBlock("Compact block", commonText)}${TextBlock("Feature block", "Useful for products with many capabilities.")}${MediaCard(pickImage(1), "Visual block", "Fast-scanning modular layout.")}${TextBlock("Risk for Condado", "Puede sentirse demasiado startup si se abusa.")} ${MediaCard(pickImage(2), "Support block", "Good for mixed content.")}</section>`;
+      return (
+        <Shell eyebrow="modular layout" title="Bento Grid" summary="Asymmetric modular blocks that help feature-rich products scan quickly.">
+          <section className="grid auto-rows-[220px] gap-6 md:grid-cols-3">
+            <div className="md:col-span-2 md:row-span-2"><Photo src={img(0)} alt="Large bento block" height={466} /></div>
+            <TextCard title="Fast scan" copy="Good for many capabilities." />
+            <TextCard title="Risk" copy="Can drift startup-ish fast." />
+            <TextCard title="For Condado" copy="Not ideal as the primary geometry." />
+            <Photo src={img(1)} alt="Bento support image" height={220} />
+            <Photo src={img(2)} alt="Bento support image" height={220} />
+          </section>
+        </Shell>
+      );
     case "concierge-funnel":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">${TextBlock("High-conversion flow", "Muchos argumentos comerciales, proceso, prueba y CTA.", "Conversion")}${MediaCard(pickImage(0), "Offer frame", "Optimized more for lead capture than brand atmosphere.", true)}</section><section class="grid gap-6 md:grid-cols-3">${TextBlock("Pain points", "Short-term copy block.")}${TextBlock("Offer", "What you get.")}${TextBlock("CTA", "Book or contact now.")}</section>`;
+      return (
+        <Shell eyebrow="conversion layout" title="Concierge Funnel" summary="A sales-led sequence designed to move the visitor quickly toward inquiry or booking.">
+          <section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="space-y-4 rounded-[36px] border border-amber-200 bg-amber-50/60 p-8 shadow-sm">
+              <p className="text-sm uppercase tracking-[0.25em] text-amber-700">Offer-first</p>
+              <h2 className="text-4xl font-semibold tracking-[-0.04em] text-slate-950">Ideal when conversion beats brand atmosphere.</h2>
+              <div className="space-y-3 pt-2">
+                <div className="rounded-[22px] bg-white p-4">01 Pain point</div>
+                <div className="rounded-[22px] bg-white p-4">02 Offer promise</div>
+                <div className="rounded-[22px] bg-white p-4">03 Process</div>
+                <div className="rounded-[22px] bg-slate-950 p-4 text-white">04 CTA</div>
+              </div>
+            </div>
+            <Photo src={img(0)} alt="Concierge funnel image" height={560} />
+          </section>
+        </Shell>
+      );
     case "dashboard-led":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">${TextBlock("UI first", "Product previews, metrics and interactive surfaces dominate.", "Product")}${TextBlock("Condado warning", "Este fue parte del problema: hace ver todo más viejo si el producto real no es software.")}</section><section class="grid gap-6 md:grid-cols-4">${TextBlock("KPI", "Occupancy")}${TextBlock("KPI", "Inquiries")}${TextBlock("KPI", "Visits")}${TextBlock("KPI", "Conversions")}</section>`;
+      return (
+        <Shell eyebrow="product-heavy layout" title="Dashboard Led" summary="A UI-dominant geometry where metrics and system previews carry the page.">
+          <section className="grid gap-6 lg:grid-cols-[260px_1fr]">
+            <div className="rounded-[32px] border border-slate-200 bg-slate-50 p-6 shadow-sm">
+              <div className="space-y-3">
+                <div className="rounded-[18px] bg-white p-3">Overview</div>
+                <div className="rounded-[18px] bg-white p-3">Pipeline</div>
+                <div className="rounded-[18px] bg-white p-3">Activity</div>
+                <div className="rounded-[18px] bg-white p-3">Settings</div>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-4">
+                <MiniStat label="Occupancy" value="87%" />
+                <MiniStat label="Leads" value="46" />
+                <MiniStat label="Tours" value="19" />
+                <MiniStat label="Move-ins" value="6" />
+              </div>
+              <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="h-80 rounded-[24px] bg-[linear-gradient(180deg,#F8FCFF_0%,#EFF6FF_100%)]" />
+              </div>
+            </div>
+          </section>
+        </Shell>
+      );
     case "product-showcase":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[1fr_1fr]">${MediaCard(pickImage(1), "Launch visual", "Best when the thing itself is a sleek product object.", true)}${TextBlock("Launch-style sections", "Good for apps and tools. Less natural for residence brands unless heavily transformed.")}</section>`;
+      return (
+        <Shell eyebrow="launch layout" title="Product Showcase" summary="Launch-style geometry with a dominant visual object and clean supporting sections.">
+          <section className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div className="space-y-6">
+              <h2 className="text-5xl font-semibold tracking-[-0.05em] text-slate-950">This works better when the product is the object.</h2>
+              <p className="text-lg leading-8 text-slate-600">Excellent for apps and software launches. Less natural for apartments unless transformed into a lifestyle object.</p>
+            </div>
+            <Photo src={img(1)} alt="Product showcase hero" height={620} />
+          </section>
+        </Shell>
+      );
     case "case-study-flow":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-3">${TextBlock("Before", "Old, generic, template-heavy feel.", "Before/after")}${TextBlock("Approach", "Shift to visual-first, editorial, hospitality-led geometry.")}${TextBlock("After", "More aspirational, cleaner, more modern.")}</section><section class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">${TextBlock("When useful", "Excelente para explicar transformations or redesign logic.")}${MediaCard(pickImage(0), "Proof panel", "Works when credibility is the goal.")}</section>`;
+      return (
+        <Shell eyebrow="proof layout" title="Case Study Flow" summary="A narrative geometry that explains transformation through before/after and proof sections.">
+          <section className="grid gap-6 md:grid-cols-3">
+            <TextCard eyebrow="before" title="Old feel" copy="Generic, dark, starter-heavy." />
+            <TextCard eyebrow="approach" title="Intervention" copy="Shift to hospitality-led editorial geometry." />
+            <TextCard eyebrow="after" title="New feel" copy="Cleaner, brighter, more image-led." />
+          </section>
+          <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+            <Photo src={img(0)} alt="Case study visual" height={420} />
+            <TextCard title="Best use" copy="Useful when the page needs to prove method and credibility, not just look attractive." />
+          </section>
+        </Shell>
+      );
     case "catalog-stack":
-      return `${hero}<section class="space-y-6">${TextBlock("Inventory-first", "Useful when units or options are the main behavior.", "Browsing")}<div class="grid gap-6 md:grid-cols-2">${MediaCard(pickImage(0), "2 Bedroom", "Primary listing card.")}${MediaCard(pickImage(1), "3 Bedroom", "Secondary listing card.")}</div><div class="grid gap-6 md:grid-cols-2">${MediaCard(pickImage(2), "Floor plan", "Details and dimensions.")}${TextBlock("Risk", "Can feel too transactional if the brand needs desire first.")}</div></section>`;
+      return (
+        <Shell eyebrow="inventory layout" title="Catalog Stack" summary="A stacked browsing model built around listing cards and structured option review.">
+          <section className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Photo src={img(0)} alt="Catalog unit A" height={360} />
+              <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-2xl font-semibold">2 Bedroom</h3><p className="mt-3 text-sm leading-7 text-slate-600">Inventory card with specs, pricing, and leasing CTA.</p></div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Photo src={img(1)} alt="Catalog unit B" height={360} />
+              <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-2xl font-semibold">3 Bedroom</h3><p className="mt-3 text-sm leading-7 text-slate-600">Better when the user really needs to compare options.</p></div>
+            </div>
+          </section>
+        </Shell>
+      );
     case "hero-stack":
-      return `${hero}<section class="space-y-6">${MediaCard(pickImage(0), "Hero block one", "Strong opener.", true)}${MediaCard(pickImage(1), "Hero block two", "Second message layer.", true)}${MediaCard(pickImage(2), "Hero block three", "Third proposition band.", true)}</section>`;
+      return (
+        <Shell eyebrow="campaign layout" title="Hero Stack" summary="A page made of multiple strong hero bands instead of one main opening section.">
+          <section className="space-y-6">
+            <Photo src={img(0)} alt="Hero band one" height={420} rounded="rounded-[40px]" />
+            <Photo src={img(1)} alt="Hero band two" height={420} rounded="rounded-[40px]" />
+            <Photo src={img(2)} alt="Hero band three" height={420} rounded="rounded-[40px]" />
+          </section>
+        </Shell>
+      );
     case "immersive-cards":
-      return `${hero}<section class="grid gap-6 md:grid-cols-2">${MediaCard(pickImage(0), "Card one", "Rounded premium card.", true)}${MediaCard(pickImage(1), "Card two", "Soft immersive layout.", true)}${TextBlock("Mood", "Young, premium, friendlier than strict editorial.")}${TextBlock("Use", "Hospitality, travel, experience pages.")}</section>`;
+      return (
+        <Shell eyebrow="soft premium layout" title="Immersive Cards" summary="Large rounded modules create a softer, more tactile premium browsing experience.">
+          <section className="grid gap-6 md:grid-cols-2">
+            <Photo src={img(0)} alt="Immersive card one" height={500} rounded="rounded-[42px]" />
+            <Photo src={img(1)} alt="Immersive card two" height={500} rounded="rounded-[42px]" />
+            <TextCard title="Mood" copy="Friendlier and more lifestyle-driven than strict editorial." />
+            <TextCard title="Best for" copy="Travel, hospitality, and youth-oriented premium brands." />
+          </section>
+        </Shell>
+      );
     case "asymmetric-mosaic":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]"><div class="grid gap-6">${MediaCard(pickImage(0), "Wide tile", "Asymmetry adds energy.", true)}${TextBlock("Mosaic behavior", "Feels more digital-native and less formal.")}</div><div class="grid gap-6">${MediaCard(pickImage(1), "Tall tile", "Unexpected proportions.", true)}${MediaCard(pickImage(2), "Small tile", "Support image.")}</div></section>`;
+      return (
+        <Shell eyebrow="high-energy layout" title="Asymmetric Mosaic" summary="An uneven image and text system that feels more digital-native and youthful.">
+          <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="space-y-6">
+              <Photo src={img(0)} alt="Wide mosaic tile" height={520} />
+              <TextCard title="Why it stands out" copy="The imbalance creates energy, which helps younger brands feel current." />
+            </div>
+            <div className="space-y-6">
+              <Photo src={img(1)} alt="Tall mosaic tile" height={360} />
+              <Photo src={img(2)} alt="Small mosaic tile" height={220} />
+            </div>
+          </section>
+        </Shell>
+      );
     case "framed-showcase":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">${TextBlock("Contained premium modules", "Everything feels framed and intentional.", "Framing")}${MediaCard(pickImage(1), "Primary framed asset", "Good for premium composure.", true)}</section><section class="grid gap-6 md:grid-cols-3">${TextBlock("Strength", "Order")}${TextBlock("Risk", "Can feel boxed-in if overused.")}${TextBlock("Fit", "Premium launches and structured brands.")}</section>`;
+      return (
+        <Shell eyebrow="framed premium layout" title="Framed Showcase" summary="Contained showcase modules with clear borders and more formal premium framing.">
+          <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <TextCard eyebrow="framing" title="Strong containment" copy="Every module feels deliberate and bounded, which raises perceived order." />
+            <div className="rounded-[40px] border border-slate-300 bg-white p-6 shadow-sm">
+              <Photo src={img(1)} alt="Framed hero asset" height={520} rounded="rounded-[24px]" />
+            </div>
+          </section>
+        </Shell>
+      );
     case "story-panels":
-      return `${hero}<section class="space-y-6">${TextBlock("Panel 01", "Arrival and first impression.", "Scene")}${MediaCard(pickImage(0), "Panel 02", "Residence and light.", true)}${TextBlock("Panel 03", "Neighborhood and daily rhythm.")}${MediaCard(pickImage(1), "Panel 04", "Layouts and practical value.", true)}</section>`;
+      return (
+        <Shell eyebrow="scene-by-scene layout" title="Story Panels" summary="The visitor moves through sequential scenes, like chapters in a visual story.">
+          <section className="space-y-6">
+            <TextCard eyebrow="scene 01" title="Arrival" copy="Open with mood and first impression." />
+            <Photo src={img(0)} alt="Scene two" height={460} />
+            <TextCard eyebrow="scene 03" title="Neighborhood" copy="Then shift to context and daily life." />
+            <Photo src={img(1)} alt="Scene four" height={460} />
+          </section>
+        </Shell>
+      );
     case "minimal-rows":
-      return `${hero}<section class="space-y-6">${TextBlock("Minimal row one", "Short copy, lots of restraint.", "Minimalism")}${TextBlock("Minimal row two", "Useful when the brand already carries authority.")}${TextBlock("Minimal row three", "For Condado it may under-sell the lifestyle unless photography is elite.")}</section>`;
+      return (
+        <Shell eyebrow="minimal layout" title="Minimal Rows" summary="Short restrained sections stacked vertically with very little decorative complexity.">
+          <section className="space-y-4">
+            <div className="border-t border-slate-200 py-8"><h2 className="text-3xl font-semibold">Minimal row one</h2><p className="mt-3 max-w-2xl text-slate-600">Typography and restraint do most of the work.</p></div>
+            <div className="border-t border-slate-200 py-8"><h2 className="text-3xl font-semibold">Minimal row two</h2><p className="mt-3 max-w-2xl text-slate-600">Very elegant when brand assets are already exceptional.</p></div>
+            <div className="border-t border-b border-slate-200 py-8"><h2 className="text-3xl font-semibold">Minimal row three</h2><p className="mt-3 max-w-2xl text-slate-600">Risk: under-selling energy and lifestyle.</p></div>
+          </section>
+        </Shell>
+      );
     case "split-narrative":
-      return `${hero}<section class="space-y-6"><div class="grid gap-6 lg:grid-cols-[1fr_1fr]">${TextBlock("Narrative block", "Alternating split layout keeps clarity and movement.", "Balanced")} ${MediaCard(pickImage(0), "Media block", "Easy to understand and adapt.", true)}</div><div class="grid gap-6 lg:grid-cols-[1fr_1fr]">${MediaCard(pickImage(1), "Media block", "Second movement.", true)} ${TextBlock("Why useful", "Muy flexible para casi cualquier vertical.")}</div></section>`;
+      return (
+        <Shell eyebrow="alternating layout" title="Split Narrative" summary="Alternating text and image blocks create an easy-to-follow modern explanatory rhythm.">
+          <section className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
+              <TextCard title="Block one" copy="Explanation on the left, visual on the right." />
+              <Photo src={img(0)} alt="Split narrative first block" height={420} />
+            </div>
+            <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
+              <Photo src={img(1)} alt="Split narrative second block" height={420} />
+              <TextCard title="Block two" copy="Then flip it to maintain motion and balance." />
+            </div>
+          </section>
+        </Shell>
+      );
     case "feature-ribbon":
-      return `${hero}<section class="space-y-6"><div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm"><div class="grid gap-4 md:grid-cols-4"><div class="rounded-[22px] bg-slate-50 p-4">Beach access</div><div class="rounded-[22px] bg-slate-50 p-4">Modern units</div><div class="rounded-[22px] bg-slate-50 p-4">Move-in ready</div><div class="rounded-[22px] bg-slate-50 p-4">Condado location</div></div></div>${TextBlock("Benefit-heavy geometry", "Ideal para marcas que necesitan comunicar muchas amenidades rápido.")}</section>`;
+      return (
+        <Shell eyebrow="benefit layout" title="Feature Ribbon" summary="Horizontal bands create a faster benefit-scanning experience.">
+          <section className="space-y-6">
+            <div className="grid gap-4 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-4">
+              <div className="rounded-[22px] bg-slate-50 p-5">Beach access</div>
+              <div className="rounded-[22px] bg-slate-50 p-5">Modern units</div>
+              <div className="rounded-[22px] bg-slate-50 p-5">Move-in ready</div>
+              <div className="rounded-[22px] bg-slate-50 p-5">Condado location</div>
+            </div>
+            <TextCard title="Why use it" copy="Good when the page needs to communicate multiple amenity/value ribbons quickly." />
+          </section>
+        </Shell>
+      );
     case "map-lifestyle":
-      return `${hero}<section class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">${TextBlock("Neighborhood as hero", "La ubicación y lo que la rodea se vuelven parte central del diseño.", "Location-led")} ${MediaCard(pickImage(2), "Map / context stage", "Ideal para properties where place sells the experience.", true)}</section><section class="grid gap-6 md:grid-cols-3">${TextBlock("Beach", "Walkability and coast.")}${TextBlock("Food + culture", "Nearby energy.")}${TextBlock("Daily convenience", "Why living here works.")}</section>`;
+      return (
+        <Shell eyebrow="location-led layout" title="Map Lifestyle" summary="Location and surrounding lifestyle are promoted to primary structural elements.">
+          <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div className="space-y-6">
+              <TextCard eyebrow="location-led" title="Neighborhood is the hook" copy="This geometry is for brands where the place itself is a major part of the value." />
+              <div className="grid gap-4 sm:grid-cols-3">
+                <MiniStat label="Walkability" value="High" />
+                <MiniStat label="Beach" value="Steps away" />
+                <MiniStat label="Cafés" value="Nearby" />
+              </div>
+            </div>
+            <Photo src={img(2)} alt="Map lifestyle visual" height={560} />
+          </section>
+        </Shell>
+      );
     case "residence-journal":
-      return `${hero}<section class="space-y-6">${TextBlock("Journal tone", "Una estructura serena, aspiracional y muy de marca residencial boutique.", "Strong pick")}<div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">${MediaCard(pickImage(0), "Curated residence story", "Feels young, premium, and contemporary without trying too hard.", true)}${TextBlock("Why I like it for Condado", "Tiene más alma de property brand moderna que de landing genérica. Deja respirar, deja mostrar, y hace que el sitio se sienta menos viejo.")}</div><div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">${TextBlock("Behavior", "Shorter copy, stronger imagery, more curated section pacing.")}${MediaCard(pickImage(1), "Secondary journal frame", "Works well with architecture, interiors, and neighborhood moments.")}</div></section>`;
+      return (
+        <Shell eyebrow="residential editorial layout" title="Residence Journal" summary="A calm residential brand system with curated pacing, refined imagery, and less landing-page energy.">
+          <section className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+              <Photo src={img(0)} alt="Residence journal hero" height={640} rounded="rounded-[44px]" />
+              <div className="space-y-6">
+                <TextCard eyebrow="strong pick" title="Feels like a modern residence brand" copy="This is one of the strongest directions for Condado because it avoids both generic SaaS and generic real-estate listing energy." />
+                <TextCard title="Behavior" copy="Less noise, more curation, more image confidence, more brand tone." />
+              </div>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+              <TextCard title="Secondary chapter" copy="Use this section for neighborhood, amenity, or floor plan storytelling." />
+              <Photo src={img(1)} alt="Residence journal secondary image" height={420} />
+            </div>
+          </section>
+        </Shell>
+      );
     default:
-      return hero;
+      return null;
   }
 }
 
@@ -106,24 +373,7 @@ export default async function LayoutDetailPage({ params }: { params: Promise<{ s
 
   if (!layout) notFound();
 
-  return (
-    <main className="min-h-screen bg-white px-6 py-10 text-slate-950 sm:px-8 lg:px-10">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-[0.25em] text-cyan-700">{layout.category} layout</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-slate-950">{layout.label}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">{layout.summary} Best for: {layout.bestFor}</p>
-          </div>
-          <Link href="/layout-showcase" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50">
-            All layouts
-          </Link>
-        </div>
-
-        <div dangerouslySetInnerHTML={{ __html: layoutMarkup(slug) }} />
-      </div>
-    </main>
-  );
+  return <LayoutView slug={slug} />;
 }
 
 export function generateStaticParams() {
